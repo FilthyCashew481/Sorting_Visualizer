@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 public class App {
     public static void main(String[] args) throws Exception {
-        Window window = new Window(1200, 700, 100);
+        Window window = new Window(1800, 1000, 100);
     }
 }
 
@@ -37,7 +37,7 @@ class Bar extends Rectangle {
         double barSpace = screenWidth/numBars; //good
         double barWidth = barSpace - whiteSpace; //good
         super.setWidth(barWidth);
-        super.setFillColor(252, 127, 3);
+        super.setFillColor(166, 166, 166);
         //current_rect = ((current_bar * bar_space) + (white_space/2), bar_top, bar_width, bar_height)
         super.setHeight(screenHeight * value / numBars);
         super.setY(screenHeight - super.getHeight());
@@ -57,6 +57,22 @@ class Bar extends Rectangle {
 
     public String toString() {
         return "There is a bar at place: " + place + " and width value: " + value;
+    }
+
+    public void select() {
+        super.setFillColor(252, 0, 0);
+    }
+
+    public void unselect() {
+        super.setFillColor(166, 166, 166);
+    }
+
+    public void selectPivot() {
+        super.setFillColor(0, 255, 0);
+    } 
+
+    public void sorted() {
+        super.setFillColor(52, 131, 235);
     }
 }
 
@@ -89,11 +105,16 @@ class Window extends Pad { //base class for the particle system
         Collections.shuffle(Arrays.asList(bars));
         quickSortIterative(bars, 0, numBars - 1);
         updatePlace();
+
+        for (int i = 0; i < numBars; i++ ) {
+            bars[i].sorted();
+            updatePlace();
+        }
     }
     
     public void updatePlace() {
         try{
-            TimeUnit.MILLISECONDS.sleep(250);
+            TimeUnit.MILLISECONDS.sleep(25);
         } catch(Exception e){
             System.out.println(e + "uh oh");
         }
@@ -108,9 +129,12 @@ class Window extends Pad { //base class for the particle system
 	smaller (smaller than pivot) to left of
 	pivot and all greater elements to right
 	of pivot */
-	static int partition(Bar arr[], int low, int high)
+	public int partition(Bar arr[], int low, int high)
 	{
 		int pivot = (int)arr[high].getValue();
+
+        Bar pivotBar = arr[high];
+        pivotBar.selectPivot(); //WORKING  
 
 		// index of smaller element
 		int i = (low - 1);
@@ -122,8 +146,11 @@ class Window extends Pad { //base class for the particle system
 
 				// swap arr[i] and arr[j]
 				Bar temp = arr[i];
+                temp.select();
 				arr[i] = arr[j];
 				arr[j] = temp;
+                updatePlace();
+                temp.unselect();
 			}
 		}
 
@@ -131,6 +158,9 @@ class Window extends Pad { //base class for the particle system
 		Bar temp = arr[i + 1];
 		arr[i + 1] = arr[high];
 		arr[high] = temp;
+        updatePlace();
+
+        pivotBar.unselect(); //WORKING
 
 		return i + 1;
 	}
@@ -152,7 +182,6 @@ h --> Ending index */
 
 		// Keep popping from stack while is not empty
 		while (top >= 0) {
-            updatePlace();
 			// Pop h and l
 			h = stack[top--];
 			l = stack[top--];
